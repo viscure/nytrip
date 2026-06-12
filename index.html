@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NYC Aug 2026 🗽</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗽</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #09111E;
+  --bg2:       #0E1A2B;
+  --bg3:       #152035;
+  --card:      #111E30;
+  --border:    #1D3050;
+  --text:      #E4ECF7;
+  --text2:     #7A90AD;
+  --accent:    #D4A840;
+  --accent2:   #3A9EE0;
+  --radius:    10px;
+  --footer-h:  56px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+
+/* ── HEADER ─────────────────────────────── */
+#header{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding-top:env(safe-area-inset-top,0px);
+}
+#hdr-top{
+  display:flex;align-items:center;justify-content:center;
+  padding:10px 16px 6px;gap:8px;
+}
+#hdr-title{font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.03em}
+#day-tabs{
+  display:flex;overflow-x:auto;scrollbar-width:none;
+  padding:0 10px 10px;gap:5px;
+}
+#day-tabs::-webkit-scrollbar{display:none}
+.day-tab{
+  flex-shrink:0;padding:5px 13px;border-radius:20px;
+  font-size:.72rem;font-weight:500;cursor:pointer;
+  background:var(--bg3);color:var(--text2);
+  border:1px solid var(--border);transition:all .2s;
+  white-space:nowrap;user-select:none;
+}
+.day-tab.active{
+  background:var(--accent);color:#09111E;
+  border-color:var(--accent);font-weight:700;
+}
+
+/* ── FOOTER ─────────────────────────────── */
+#footer{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:var(--bg2);border-top:1px solid var(--border);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.fnav{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:8px 0;gap:2px;
+  font-size:.62rem;color:var(--text2);cursor:pointer;
+  transition:color .2s;user-select:none;
+}
+.fnav .fi{font-size:1.25rem;line-height:1}
+.fnav.active{color:var(--accent)}
+
+/* ── MAIN ────────────────────────────────── */
+#main{min-height:100vh;padding-bottom:calc(var(--footer-h) + env(safe-area-inset-bottom,0px) + 8px)}
+.view{display:none}
+.view.active{display:block}
+
+/* ── TODAY BANNER ─────────────────────────── */
+#today-banner{
+  background:linear-gradient(135deg,var(--accent) 0%,#E8C060 100%);
+  color:#09111E;text-align:center;font-size:.78rem;font-weight:700;
+  padding:6px 16px;display:none;
+}
+#today-banner.show{display:block}
+
+/* ── TIMELINE ────────────────────────────── */
+#tl-wrap{padding:10px 10px 16px;will-change:transform,opacity}
+.day-head{
+  text-align:center;font-size:.78rem;font-weight:700;
+  color:var(--text2);letter-spacing:.06em;text-transform:uppercase;
+  padding:4px 0 14px;
+}
+
+.tl{position:relative;padding-left:56px}
+.tl::before{
+  content:'';position:absolute;left:46px;top:0;bottom:0;
+  width:2px;background:var(--border);border-radius:2px;
+}
+
+.tl-row{position:relative;margin-bottom:5px}
+
+.tl-time{
+  position:absolute;left:-56px;width:48px;
+  text-align:right;top:13px;
+  font-size:.67rem;font-weight:600;color:var(--text2);line-height:1;
+}
+.tl-dot{
+  position:absolute;left:-10px;top:14px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--border);border:2px solid var(--bg2);z-index:1;
+}
+.tl-row.curr .tl-dot{background:var(--accent);box-shadow:0 0 0 3px rgba(212,168,64,.25)}
+
+.act-card{
+  border-radius:var(--radius);padding:10px 12px;
+  cursor:pointer;transition:transform .12s;
+  border-left:3px solid transparent;
+  position:relative;overflow:hidden;
+}
+.act-card:active{transform:scale(.98)}
+
+/* Category themes */
+.c-atraccion{background:rgba(76,175,80,.1);border-left-color:#81C784}
+.c-comida{background:rgba(255,152,0,.1);border-left-color:#FFB74D}
+.c-tienda{background:rgba(206,147,216,.1);border-left-color:#CE93D8}
+.c-paseo{background:rgba(79,195,247,.1);border-left-color:#81D4FA}
+.c-dc{background:rgba(239,83,80,.09);border-left-color:#EF9A9A}
+.c-transporte{background:rgba(144,164,174,.09);border-left-color:#90A4AE}
+.c-gratis{background:rgba(255,241,118,.09);border-left-color:#FFF176}
+.c-llegada{background:rgba(255,138,101,.1);border-left-color:#FFAB91}
+.c-comida.c-llegada,.c-llegada{background:rgba(255,112,67,.09);border-left-color:#FF8A65}
+
+/* Current time highlight */
+.tl-row.curr .act-card::before{
+  content:'▶ AHORA';position:absolute;top:0;right:0;
+  font-size:.6rem;font-weight:700;letter-spacing:.08em;
+  background:var(--accent);color:#09111E;
+  padding:2px 7px;border-radius:0 var(--radius) 0 6px;
+}
+
+.act-head{display:flex;align-items:flex-start;gap:8px}
+.act-emoji{font-size:1.05rem;flex-shrink:0;line-height:1.4;margin-top:1px}
+.act-body{flex:1;min-width:0}
+.act-title{font-size:.83rem;font-weight:600;line-height:1.3;color:var(--text)}
+.act-price{font-size:.68rem;color:var(--accent);font-weight:500;margin-top:2px}
+.act-chevron{font-size:.65rem;color:var(--text2);flex-shrink:0;margin-top:3px;transition:transform .2s}
+.act-card.open .act-chevron{transform:rotate(180deg)}
+
+.act-detail{
+  display:none;margin-top:8px;padding-top:8px;
+  border-top:1px solid rgba(255,255,255,.07);
+  font-size:.77rem;color:var(--text2);line-height:1.55;
+}
+.act-card.open .act-detail{display:block}
+
+.act-map{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:7px;color:var(--accent2);font-size:.74rem;
+  text-decoration:none;font-weight:500;
+}
+.act-map:hover{text-decoration:underline}
+
+/* Transport divider */
+.tl-transport{
+  display:flex;align-items:center;gap:6px;
+  padding:2px 0 3px 2px;font-size:.68rem;color:var(--text2);opacity:.65;
+}
+
+/* ── RESERVAS ─────────────────────────────── */
+#res-view{padding:12px}
+.prog-wrap{margin-bottom:14px}
+.prog-bar-bg{height:6px;background:var(--bg3);border-radius:6px;overflow:hidden;margin-bottom:5px}
+.prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:6px;transition:width .4s}
+.prog-label{text-align:center;font-size:.73rem;color:var(--text2)}
+
+.res-card{
+  background:var(--card);border-radius:var(--radius);
+  padding:12px 12px 12px 10px;margin-bottom:8px;
+  display:flex;gap:10px;align-items:flex-start;
+  border:1px solid var(--border);transition:opacity .25s;
+}
+.res-card.done{opacity:.45}
+.res-card.done .res-title{text-decoration:line-through;color:var(--text2)}
+
+.res-chk{
+  width:22px;height:22px;border-radius:50%;
+  border:2px solid var(--border);flex-shrink:0;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;margin-top:1px;font-size:.75rem;color:transparent;
+}
+.res-chk.on{background:var(--accent);border-color:var(--accent);color:#09111E;font-weight:700}
+
+.res-num{font-size:.62rem;font-weight:700;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.res-title{font-size:.84rem;font-weight:600;color:var(--text);line-height:1.3}
+.res-meta{margin-top:6px;font-size:.73rem;color:var(--text2);line-height:1.6}
+.res-price{color:var(--accent);font-weight:500}
+.res-link a{color:var(--accent2);text-decoration:none;word-break:break-all}
+.res-link a:hover{text-decoration:underline}
+.res-tip{font-size:.71rem;color:var(--text2);margin-top:3px}
+.res-urgent{
+  background:rgba(255,152,0,.12);border:1px solid rgba(255,152,0,.25);
+  border-radius:6px;padding:5px 8px;margin-top:6px;
+  font-size:.71rem;color:#FFB74D;font-weight:500;
+}
+
+/* ── INFO ────────────────────────────────── */
+#info-view{padding:12px}
+.info-sec{
+  background:var(--card);border-radius:var(--radius);
+  margin-bottom:8px;border:1px solid var(--border);overflow:hidden;
+}
+.info-hdr{
+  padding:12px 14px;font-size:.84rem;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  color:var(--text);user-select:none;
+}
+.info-chev{color:var(--text2);transition:transform .2s;font-size:.72rem}
+.info-sec.open .info-chev{transform:rotate(180deg)}
+.info-body{display:none;padding:0 14px 14px;font-size:.79rem;color:var(--text2);line-height:1.6}
+.info-sec.open .info-body{display:block}
+
+.irow{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);gap:8px;
+}
+.irow:last-child{border-bottom:none}
+.irow .ilabel{color:var(--text);font-weight:500;flex-shrink:0}
+.irow .ival{text-align:right;font-size:.75rem}
+.irow .ival a{color:var(--accent2);text-decoration:none}
+.irow .ival a:hover{text-decoration:underline}
+.irow.bold .ival{color:var(--accent);font-weight:700;font-size:.85rem}
+.tip-line{margin-bottom:5px}
+.app-line strong{color:var(--text)}
+
+/* ── DESKTOP ─────────────────────────────── */
+@media(min-width:560px){
+  #header,#footer,#main{max-width:520px;left:50%;transform:translateX(-50%)}
+  #main{position:relative}
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="hdr-top">
+    <div id="hdr-title">NYC Aug 2026 🗽</div>
+  </div>
+  <div id="day-tabs"></div>
+</div>
+
+<div id="main">
+  <!-- ITINERARIO -->
+  <div id="itin-view" class="view active">
+    <div id="today-banner"></div>
+    <div id="tl-wrap"></div>
+  </div>
+
+  <!-- RESERVAS -->
+  <div id="res-view" class="view">
+    <div class="prog-wrap">
+      <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-label" id="prog-label">0/11 completados</div>
+    </div>
+    <div id="res-list"></div>
+  </div>
+
+  <!-- INFO -->
+  <div id="info-view" class="view"></div>
+</div>
+
+<div id="footer">
+  <div class="fnav active" onclick="showView('itin-view',this)"><span class="fi">📅</span><span>Itinerario</span></div>
+  <div class="fnav" onclick="showView('res-view',this)"><span class="fi">✅</span><span>Reservas</span></div>
+  <div class="fnav" onclick="showView('info-view',this)"><span class="fi">ℹ️</span><span>Info</span></div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+
+const DAYS = [
+  {
+    date:'2026-08-18', label:'Mar 18',
+    head:'DÍA 1 · Mar 18 · 🛬 LLEGADA',
+    acts:[
+      {t:'22:00',cat:'llegada',e:'🛬',title:'Llegada JFK',
+       desc:'Taxi al hotel (~100 $, 45-60 min) o AirTrain+LIRR a Penn Station. Penn Station está a solo 5 minutos a pie del hotel.',
+       price:'~100 $ taxi',addr:'JFK Airport, Queens, New York'},
+      {t:'23:00',cat:'comida',e:'🍜',title:'Cena tardía en Koreatown',
+       desc:'¡Estáis en K-Town! Todo abierto 24h. The Kunjip (32 W 32nd St): comfort food coreano auténtico, eficiente y barato.',
+       price:'~15 $/pers',addr:'32 W 32nd St, New York'},
+    ]
+  },
+  {
+    date:'2026-08-19', label:'Mié 19',
+    head:'DÍA 2 · Mié 19 · 📍 MIDTOWN',
+    acts:[
+      {t:'09:00',cat:'atraccion',e:'🏙️',title:'Empire State Building — Mañana',
+       desc:'New York Pass. ¡A 2 BLOQUES del hotel! Sin subway, todo a pie. 86ª planta. Madrugad para menos colas. Reservar franja 9-10h en app Go City.',
+       price:'NY Pass',addr:'20 W 34th St, New York',
+       transport:'🚶 2 bloques a pie desde el hotel'},
+      {t:'11:00',cat:'tienda',e:'🏬',title:"Macy's Herald Square",
+       desc:'3 minutos a pie del hotel. La gran tienda por departamentos de NYC. Escalera de madera original de 1902. Gratis entrar.',
+       price:'Gratis',addr:'151 W 34th St, New York',
+       transport:'🚶 3 min a pie'},
+      {t:'12:00',cat:'paseo',e:'🎭',title:'Times Square',
+       desc:'10 minutos a pie desde el hotel. El corazón palpitante de NYC. Ruidoso, abarrotado y absolutamente espectacular.',
+       addr:'Times Square, New York',transport:'🚶 10 min a pie'},
+      {t:'13:00',cat:'comida',e:'🌮',title:'Almuerzo: Los Tacos No.1',
+       desc:'Auténticos tacos mexicanos. Uno de los mejores de toda NYC. Cola rápida.',
+       price:'10-14 $/pers',addr:'229 W 43rd St, New York'},
+      {t:'14:00',cat:'tienda',e:'🍫',title:"M&M's Store + Hershey's",
+       desc:"M&M's (1600 Broadway): 3 plantas, M&Ms personalizados únicos en el mundo. Hershey's (701 7th Ave): tienda icónica. Ambas gratuitas.",
+       price:'Gratis',addr:"1600 Broadway, New York"},
+      {t:'15:00',cat:'tienda',e:'🧸',title:'FAO Schwarz + LEGO Store + Nintendo NY',
+       desc:'FAO Schwarz: el piano gigante (Big, 1988!) + Jellycat Diner. LEGO Store (636 5th Ave). Nintendo NY (10 Rock Plaza): única tienda oficial en América.',
+       price:'Gratis',addr:'30 Rockefeller Plaza, New York'},
+      {t:'17:00',cat:'paseo',e:'🚶',title:'5ª Avenida',
+       desc:"Tiffany & Co., Saks Fifth Avenue, St. Patrick's Cathedral. Todo a pie por la avenida más emblemática del mundo.",
+       addr:'5th Ave, New York'},
+      {t:'18:00',cat:'transporte',e:'🏠',title:'Descanso en el hotel',
+       desc:'A 10 min caminando desde 5th Ave. Ducha y cambio para salir de noche.'},
+      {t:'19:00',cat:'comida',e:'🔥',title:'Cena: Jongro BBQ',
+       desc:'Korean BBQ auténtico. ¡Literalmente en vuestra calle! Carbón a la mesa, muy popular, considerad reservar.',
+       price:'25-35 $/pers',addr:'22 W 32nd St, New York',transport:'🚶 En vuestra misma calle'},
+      {t:'20:00',cat:'atraccion',e:'🌃',title:'Empire State de Noche',
+       desc:'NY Pass. Solo 2 bloques del hotel. NYC iluminada desde 86 pisos. TOP experiencia del viaje. Doble visita (día + noche) si el pass la incluye.',
+       price:'NY Pass',addr:'20 W 34th St, New York',transport:'🚶 2 bloques a pie'},
+    ]
+  },
+  {
+    date:'2026-08-20', label:'Jue 20',
+    head:'DÍA 3 · Jue 20 · 📍 WEST SIDE',
+    acts:[
+      {t:'09:00',cat:'transporte',e:'🚶',title:'Caminar a Pier 83',
+       desc:'Desde hotel ~20 min a pie por 34th St hacia el río Hudson. Paseo por Midtown West.',
+       addr:'Pier 83, W 42nd St & 12th Ave, New York'},
+      {t:'10:00',cat:'atraccion',e:'🚢',title:'Circle Line Cruise',
+       desc:'NY Pass. ~90 min. Estatua de la Libertad, Ellis Island, puentes, skyline completo. Sentaos en lado DERECHO (estribor) para vistas de la Estatua. Protección solar y gorra.',
+       price:'NY Pass',addr:'Pier 83, W 42nd St & 12th Ave, New York'},
+      {t:'12:00',cat:'paseo',e:'🏙️',title:'Hudson Yards',
+       desc:'10 min caminando al sur desde Pier 83. El barrio más nuevo y moderno de NYC.',
+       addr:'Hudson Yards, New York',transport:'🚶 10 min al sur'},
+      {t:'13:00',cat:'comida',e:'🥘',title:'Almuerzo: Little Spain',
+       desc:'Tapas, tortilla española, jamón ibérico. Mercado de estilo español de José Andrés. Ambiente excepcional.',
+       price:'12-18 $/pers',addr:'10 Hudson Yards, New York'},
+      {t:'14:00',cat:'paseo',e:'🏗️',title:'The Vessel + The Shed',
+       desc:'The Vessel: estructura de escaleras de 16 pisos, arquitectura espectacular (foto obligatoria). The Shed: centro de artes contemporáneas. Exterior gratis.',
+       price:'Gratis',addr:'Hudson Yards, New York'},
+      {t:'15:00',cat:'paseo',e:'🌿',title:'The High Line',
+       desc:'Parque elevado sobre antiguas vías de tren. Entrada en 34th St → caminar hacia el sur. 2.3 km de arte urbano, instalaciones y vistas del Hudson. Gratis y precioso.',
+       price:'Gratis',addr:'High Line, W 34th St entrance, New York',transport:'🚶 2 min al norte'},
+      {t:'17:00',cat:'tienda',e:'🏪',title:'Chelsea Market',
+       desc:'Mercado gourmet dentro de la antigua fábrica de galletas Nabisco. Decenas de puestos de comida y tiendas únicas.',
+       price:'Gratis entrada',addr:'75 9th Ave, New York',transport:'🚶 5 min al sur por High Line'},
+      {t:'18:00',cat:'paseo',e:'🎨',title:'Galerías de Arte Chelsea',
+       desc:'10th-11th Ave entre calles 20-28. Concentración de galerías de arte contemporáneo de nivel mundial. Entrada libre a todas.',
+       price:'Gratis'},
+      {t:'19:00',cat:'comida',e:'🐟',title:'Cena: Los Mariscos (Chelsea Market)',
+       desc:'Tacos de pescado y mariscos estilo Baja California. Dentro de Chelsea Market. Fresco y delicioso.',
+       price:'12-16 $/pers',addr:'75 9th Ave, New York'},
+      {t:'20:00',cat:'transporte',e:'🚶',title:'Vuelta al hotel a pie',
+       desc:'Por High Line norte / 8th Ave. ~20 min caminando por el West Side.',transport:'🚶 ~20 min a pie'},
+    ]
+  },
+  {
+    date:'2026-08-21', label:'Vie 21',
+    head:'DÍA 4 · Vie 21 · 📍 UWS + CENTRAL PARK',
+    acts:[
+      {t:'09:00',cat:'transporte',e:'🚇',title:'Subway a AMNH',
+       desc:'Desde 34th St Penn. B/D/F/M → 34th-Herald Sq, transbordo B/C → 81st St-Museum of Natural History. ~15 min.',
+       transport:'🚇 15 min en subway'},
+      {t:'10:00',cat:'atraccion',e:'🦕',title:'American Museum of Natural History',
+       desc:'NY Pass. Imprescindibles: dinosaurios (4ª planta, el mejor del mundo), Planetario Hayden (espectáculo del universo), ballena azul suspendida, sala Pueblos Originarios. Dedicad 2-3 horas mínimo.',
+       price:'NY Pass',addr:'Central Park West & 79th St, New York'},
+      {t:'13:00',cat:'comida',e:'🍗',title:"Almuerzo: Jacob's Pickles",
+       desc:"Comfort food americano del Upper West Side. Los biscuits con pollo frito son legendarios 🔥. Puede haber espera — merecida.",
+       price:'15-20 $/pers',addr:'509 Amsterdam Ave, New York',transport:'🚶 5 min a pie'},
+      {t:'14:00',cat:'paseo',e:'🌳',title:'Central Park — Strawberry Fields + The Mall',
+       desc:'Strawberry Fields: mosaico Imagine en homenaje a John Lennon. The Mall + Literary Walk: el paseo arbolado más bonito del parque.',
+       addr:'Central Park, New York',transport:'🚶 2 min a pie al parque'},
+      {t:'15:00',cat:'paseo',e:'⛲',title:'Bethesda Fountain + Bow Bridge',
+       desc:'Bethesda Fountain & Terrace: la más icónica del parque (mil películas rodadas aquí). Bow Bridge: la más fotogénica de Central Park.',
+       addr:'Bethesda Fountain, Central Park, New York'},
+      {t:'16:00',cat:'paseo',e:'🏰',title:'Belvedere Castle',
+       desc:'Entrada gratuita. Pequeño castillo de piedra con vistas panorámicas del parque. 79th St Transverse.',
+       price:'Gratis',addr:'Belvedere Castle, Central Park, New York'},
+      {t:'17:00',cat:'tienda',e:'🍎',title:'Apple Store 5th Ave',
+       desc:'El cubo de cristal más famoso del mundo. Abierto 24h. Salir por 72nd St hacia la 5th Ave.',
+       price:'Gratis',addr:'767 5th Ave, New York',transport:'🚶 10 min por 72nd St → 5th Ave'},
+      {t:'18:00',cat:'comida',e:'🍔',title:'Cena: Shake Shack',
+       desc:'La hamburguesería neoyorquina por excelencia. Burger + patatas + shake = felicidad. Precio razonable.',
+       price:'12-16 $/pers',addr:'366 Columbus Ave, New York'},
+      {t:'19:00',cat:'comida',e:'🍪',title:'Levain Bakery',
+       desc:'Las cookies más famosas de Nueva York. Del tamaño de un puño. Chocolate chip walnut = la mejor. Cola rápida. No se pueden saltar.',
+       price:'5-6 $ cookie',addr:'167 W 74th St, New York'},
+      {t:'20:00',cat:'transporte',e:'🚇',title:'Vuelta a 34th St',
+       desc:'Subway B/C desde 72nd St o 81st St → 34th St. O paseo nocturno por Upper West Side (~40 min).',transport:'🚇 subway o 🚶 paseo nocturno'},
+    ]
+  },
+  {
+    date:'2026-08-22', label:'Sáb 22',
+    head:'DÍA 5 · Sáb 22 · 📍 LOWER MANHATTAN + BROOKLYN',
+    acts:[
+      {t:'09:00',cat:'transporte',e:'🚇',title:'Subway a Lower Manhattan',
+       desc:'Desde 34th St. N/Q/R/W → Rector St, o 1/2/3 → Wall St. ~20 min.',transport:'🚇 20 min en subway'},
+      {t:'10:00',cat:'paseo',e:'🐂',title:'Wall Street + Charging Bull',
+       desc:'Toro de Wall Street (Charging Bull): foto obligatoria. Bolsa de Nueva York (NYSE): fachada imponente. Federal Hall + Stone Street: callejón adoquinado del siglo XVII.',
+       addr:'Wall St, New York'},
+      {t:'11:00',cat:'paseo',e:'🗽',title:'Battery Park + Oculus WTC',
+       desc:'Battery Park: vistas gratuitas de la Estatua de la Libertad desde tierra. Oculus (WTC Transport Hub): arquitectura de Santiago Calatrava impresionante.',
+       addr:'Battery Park, New York',transport:'🚶 10 min a pie'},
+      {t:'12:00',cat:'paseo',e:'🏗️',title:'9/11 Memorial (exterior) + One WTC',
+       desc:'Las dos piscinas del memorial (exterior gratuito). Reflexión y pausa. Freedom Tower (One WTC): la más alta del hemisferio occidental.',
+       price:'Gratis (exterior)',addr:'180 Greenwich St, New York'},
+      {t:'13:00',cat:'comida',e:'🍕',title:'Almuerzo: Eataly Downtown',
+       desc:'Mercado italiano en 4 WTC. Pizza napolitana, pasta fresca, ambiente vibrante. Enorme y perfecto para comer en uno de sus puestos.',
+       price:'12-18 $/pers',addr:'101 Liberty St, New York'},
+      {t:'15:00',cat:'paseo',e:'⚓',title:'South Street Seaport',
+       desc:'Pier 17: vistas frontales del Brooklyn Bridge con el agua de fondo. Zona revitalizada con terrazas y arquitectura histórica del puerto original.',
+       addr:'Pier 17, New York',transport:'🚶 10 min a pie'},
+      {t:'16:00',cat:'paseo',e:'🌉',title:'CRUZAR Brooklyn Bridge a pie',
+       desc:'30 minutos de paseo con vistas 360°. La hora de la tarde da la mejor luz para fotos con el skyline. Una de las experiencias imprescindibles de NYC.',
+       addr:'Brooklyn Bridge, New York',transport:'🚶 desde Pier 17, 5 min'},
+      {t:'17:00',cat:'paseo',e:'📸',title:'DUMBO — La foto icónica',
+       desc:'Washington St & Water St: la foto del Manhattan Bridge enmarcado entre edificios de ladrillo. Instagram del viaje garantizado. El barrio más fotogénico de Brooklyn.',
+       addr:'Washington St & Water St, Brooklyn, New York'},
+      {t:'18:00',cat:'paseo',e:'🎠',title:'Brooklyn Bridge Park',
+       desc:"Jane's Carousel: 2 $ (ícono del parque). Paseo junto al East River con el skyline de Manhattan en frente. Golden hour desde Brooklyn = vistas épicas.",
+       price:'2 $ carrusel',addr:'Brooklyn Bridge Park, Brooklyn, New York'},
+      {t:'19:00',cat:'comida',e:'🍕',title:"Cena: Juliana's Pizza",
+       desc:"Una de las mejores pizzas de Nueva York según los neoyorquinos. Pizza napolitana de horno de leña. Puede haber cola — vale la pena esperar.",
+       price:'15-20 $/pers',addr:'19 Old Fulton St, Brooklyn, New York'},
+      {t:'20:00',cat:'paseo',e:'🌃',title:'Skyline nocturno desde DUMBO',
+       desc:'Manhattan de noche desde Brooklyn. Una de las vistas más espectaculares del mundo. Llevar tripode o apoyarse en barandilla.'},
+      {t:'21:00',cat:'transporte',e:'🚇',title:'Subway vuelta',
+       desc:'F desde York St → 34th St-Herald Sq. ~20 min.',transport:'🚇 F desde York St'},
+    ]
+  },
+  {
+    date:'2026-08-23', label:'Dom 23',
+    head:'DÍA 6 · Dom 23 · 📍 SOHO + GREENWICH VILLAGE',
+    acts:[
+      {t:'09:00',cat:'transporte',e:'🚇',title:'Subway a SoHo',
+       desc:'N/R/W → Prince St. O caminar ~25 min al sur desde el hotel por Broadway.',transport:'🚇 N/R/W → Prince St'},
+      {t:'10:00',cat:'paseo',e:'🏛️',title:'SoHo',
+       desc:'Broadway, Greene St, Prince St. Arquitectura cast-iron (hierro fundido) del siglo XIX — la mayor concentración del mundo. Tiendas de diseño y galerías.',
+       addr:'SoHo, New York'},
+      {t:'11:00',cat:'tienda',e:'🎨',title:'MoMA Design Store + Housing Works',
+       desc:'MoMA Design Store (81 Spring St): objetos de diseño únicos y libros de arte. Housing Works Bookstore Café (126 Crosby St): librería-cafetería benéfica increíble.',
+       price:'Gratis',addr:'81 Spring St, New York'},
+      {t:'12:00',cat:'paseo',e:'🌳',title:'Washington Square Park',
+       desc:'El arco, los músicos callejeros, la fuente. Corazón del Greenwich Village y de la NYU. Ambiente bohemio e intelectual.',
+       addr:'Washington Square Park, New York',transport:'🚶 10 min a pie'},
+      {t:'13:00',cat:'comida',e:'🧆',title:"Almuerzo: Mamoun's Falafel / Joe's Pizza",
+       desc:"Mamoun's (119 MacDougal St): el falafel más famoso de NYC, en pie desde 1969, precio increíble. O Joe's Pizza (7 Carmine St): el slice de pizza neoyorquino perfecto (4-5 $).",
+       price:'4-8 $',addr:'119 MacDougal St, New York'},
+      {t:'14:00',cat:'paseo',e:'📺',title:'Bleecker St + Edificio de Friends',
+       desc:'Bleecker St: tiendas de discos vintage y boutiques independientes. 📸 Edificio de Friends: 90 Bedford St (exterior) — la fachada de la serie.',
+       addr:'90 Bedford St, New York'},
+      {t:'15:00',cat:'tienda',e:'📚',title:'Strand Bookstore + Forbidden Planet',
+       desc:"Strand (828 Broadway): '18 millas de libros', legendaria. Forbidden Planet (832 Broadway): cómics, manga, figuras, cultura geek. Ambas imprescindibles.",
+       price:'Gratis entrada',addr:'828 Broadway, New York'},
+      {t:'16:00',cat:'paseo',e:'🏢',title:'Flatiron Building + Madison Square Park',
+       desc:'El edificio triangular más icónico de NYC (1902). Madison Square Park: el primer Shake Shack + arte en el parque.',
+       addr:'175 5th Ave, New York',transport:'🚶 10 min a pie'},
+      {t:'17:00',cat:'tienda',e:'🫒',title:'Eataly Flatiron',
+       desc:'El mercado italiano más famoso de NYC. Perfecto para regalos gastronómicos: aceite, pasta, trufa, vino, chocolate. Enorme y fotogénico.',
+       addr:'200 5th Ave, New York'},
+      {t:'18:00',cat:'transporte',e:'🚶',title:'Vuelta andando al hotel',
+       desc:'Eataly a 15 min a pie. Union Square → 32nd St. Paseo tranquilo por Midtown sur.',transport:'🚶 15 min a pie'},
+      {t:'19:00',cat:'comida',e:'🍲',title:'Cena: BCD Tofu House',
+       desc:'Sundubu jjigae (estofado de tofu picante). Auténtico y reconfortante. Abierto hasta tarde. ¡Al lado del hotel!',
+       price:'15-20 $/pers',addr:'5 W 32nd St, New York'},
+      {t:'20:00',cat:'paseo',e:'🌙',title:'Paseo nocturno Midtown',
+       desc:'Times Square de noche (10 min del hotel). La energía nocturna de NYC al máximo. Lleva cámara.'},
+    ]
+  },
+  {
+    date:'2026-08-24', label:'Lun 24',
+    head:'DÍA 7 · Lun 24 · 📍 CHINATOWN + 9/11 Museum',
+    acts:[
+      {t:'07:00',cat:'gratis',e:'⚡',title:'🚨 RESERVAR ENTRADAS GRATUITAS 9/11',
+       desc:'visit.911memorial.org — 7:00 AM HORA NYC (13:00h Barcelona). SE AGOTAN EN MINUTOS. Tener la página cargada a las 6:55. Varios dispositivos simultáneos. Crear cuenta previamente. Seleccionar lunes 24 agosto, franja 17:00. Si no conseguís, usad NY Pass Explorer 4.',
+       price:'GRATIS (ahorra ~33 $/pers)'},
+      {t:'08:00',cat:'comida',e:'☕',title:'Desayuno',
+       desc:'Tomar fuerzas. Grace Street Café o Woorijip (grab-and-go) en vuestra misma calle.',
+       addr:'17 W 32nd St, New York'},
+      {t:'09:00',cat:'transporte',e:'🚇',title:'Subway a Canal St',
+       desc:'N/R/W desde 34th St → Canal St. ~15 min.',transport:'🚇 N/R/W → Canal St'},
+      {t:'10:00',cat:'paseo',e:'🏮',title:'Chinatown',
+       desc:'Canal St + Mott St (la más auténtica). El Chinatown más grande de América. Mercados, especias, patos lacados en las ventanas. Inmersivo.',
+       addr:'Canal St, New York'},
+      {t:'11:00',cat:'comida',e:'🥟',title:"Vanessa's Dumpling House",
+       desc:"4 dumplings por 3 $. Un milagro económico en pleno Manhattan. Fila rápida, mejor comerlos en pie o buscar hueco. Probar los de carne y los fritos.",
+       price:'3 $ por 4 dumplings',addr:'118A Eldridge St, New York'},
+      {t:'12:00',cat:'paseo',e:'🇮🇹',title:'Little Italy',
+       desc:"Mulberry St. Cada vez más pequeña pero auténtica. Ferrara Bakery (195 Grand St): cannoli y sfogliatelle desde 1892. El mejor cannoli de NYC.",
+       addr:'195 Grand St, New York',transport:'🚶 5 min a pie'},
+      {t:'13:00',cat:'comida',e:'🥩',title:"Almuerzo: Katz's Delicatessen",
+       desc:"LEYENDA ABSOLUTA. El sándwich de pastrami más famoso del mundo desde 1888. La mesa de 'When Harry Met Sally'. Caro (~25 $) pero es la única vez en la vida que hay que hacerlo.",
+       price:'~25 $',addr:'205 E Houston St, New York'},
+      {t:'14:00',cat:'paseo',e:'🎸',title:'East Village',
+       desc:'St. Marks Place: la calle más alternativa y auténtica de NYC. Tatuajes, tiendas vintage, bares underground, cultura punk y rock.',
+       addr:'St. Marks Place, New York',transport:'🚶 10 min a pie'},
+      {t:'15:00',cat:'comida',e:'🍜',title:"Café East Village: Xi'an Famous Foods",
+       desc:"Noodles de mano estilo chino occidental (Shaanxi). Únicos en NYC. Spicy cumin lamb noodles = top.",
+       price:'10-14 $',addr:'St. Marks Place, New York'},
+      {t:'16:00',cat:'transporte',e:'🚇',title:'Subway a WTC / 9/11 Memorial',
+       desc:'Subway a Fulton St o WTC. 5 min andando al Memorial.',transport:'🚇 → Fulton St o Cortlandt St'},
+      {t:'17:00',cat:'gratis',e:'🏛️',title:'9/11 MEMORIAL & MUSEUM',
+       desc:'Entrada GRATUITA (lunes 17h). Una de las experiencias más impactantes que podéis tener. Llevar pañuelos. Dedicad mínimo 2 horas. El museo explica todo lo que ocurrió ese día con testimonios en primera persona.',
+       price:'GRATIS',addr:'180 Greenwich St, New York'},
+      {t:'19:00',cat:'gratis',e:'🕯️',title:'Memorial exterior — Las piscinas al atardecer',
+       desc:'Los dos estanques sobre el footprint de las Torres. Los nombres grabados en bronce. Momento de reflexión y pausa.',
+       addr:'180 Greenwich St, New York'},
+      {t:'20:00',cat:'comida',e:'🍜',title:'Cena rápida: Woorijip',
+       desc:'Grab-and-go coreano. Perfecta cena rápida tras una visita emocionalmente intensa. Variado y barato.',
+       price:'8-12 $',addr:'12 W 32nd St, New York',transport:'🚇 vuelta a 34th St'},
+    ]
+  },
+  {
+    date:'2026-08-25', label:'Mar 25',
+    head:'DÍA 8 · Mar 25 · 🚆 WASHINGTON DC',
+    acts:[
+      {t:'06:00',cat:'dc',e:'⏰',title:'Salida hacia Penn Station',
+       desc:'5 MINUTOS A PIE desde el hotel. 32nd St → 33rd St & 7th Ave. Salir con las maletas pequeñas. Desayuno en la estación.',
+       addr:'Penn Station, 7th Ave & 33rd St, New York'},
+      {t:'07:00',cat:'dc',e:'🚆',title:'Amtrak NYC → Washington DC',
+       desc:'Northeast Regional, salida ~6:30-7:00 AM. 3h 30min de viaje. WiFi gratis + enchufes en cada asiento. Desayuno a bordo. Sentaos en el lado IZQUIERDO para vistas.',
+       price:'50-80 $/trayecto'},
+      {t:'10:00',cat:'dc',e:'🏛️',title:'Llegada Union Station DC',
+       desc:'El edificio de la estación es espectacular. Caminar al Capitolio (10 min a pie). La explanada más histórica de América se extiende ante vosotros.',
+       addr:'Union Station, Washington DC',transport:'🚶 10 min al Capitolio'},
+      {t:'11:00',cat:'dc',e:'🏛️',title:'US Capitol + National Mall',
+       desc:'US Capitol (exterior): la cúpula más reconocible de América. National Mall: la explanada de 3 km entre monumentos. National Gallery of Art o Air & Space Museum (ambos GRATUITOS).',
+       addr:'US Capitol, Washington DC'},
+      {t:'13:00',cat:'dc',e:'🌽',title:'Almuerzo: Founding Farmers',
+       desc:'Farm-to-table muy popular cerca de la Casa Blanca. Comida americana de calidad. Reservar con antelación o llegar pronto.',
+       price:'15-22 $/pers',addr:'1924 Pennsylvania Ave NW, Washington DC'},
+      {t:'14:00',cat:'dc',e:'🗿',title:'Washington Monument + WWII Memorial',
+       desc:'Washington Monument: el obelisco más alto de DC (169m). WWII Memorial: impresionante homenaje circular a los veteranos. Entre los dos monumentos.',
+       addr:'Washington Monument, Washington DC'},
+      {t:'15:00',cat:'dc',e:'🎖️',title:'LINCOLN MEMORIAL + Reflecting Pool',
+       desc:"'I Have a Dream' — Martin Luther King Jr. habló aquí en 1963. Abraham Lincoln sentado mira el Reflecting Pool. Una de las imágenes más icónicas de toda América.",
+       addr:'Lincoln Memorial, Washington DC'},
+      {t:'16:00',cat:'dc',e:'✊',title:'MLK Jr. Memorial + Jefferson Memorial',
+       desc:"MLK Memorial: la estatua de piedra emerge de la roca. Jefferson Memorial: junto al Tidal Basin, precioso. Paseo entre los memoriales.",
+       addr:'MLK Jr Memorial, Washington DC'},
+      {t:'17:00',cat:'dc',e:'🏛️',title:'CASA BLANCA (exterior)',
+       desc:"1600 Pennsylvania Ave. Desde Lafayette Square. La foto con la Casa Blanca de fondo. El secreto del servicio no os dejará entrar pero las rejas son fotogénicas.",
+       addr:'1600 Pennsylvania Ave NW, Washington DC'},
+      {t:'18:00',cat:'dc',e:'🚶',title:'Vuelta a Union Station',
+       desc:'~20 min caminando. El edificio neoclásico de Union Station es impresionante por dentro. Cena rápida en la estación.',
+       addr:'Union Station, Washington DC'},
+      {t:'19:00',cat:'dc',e:'🚆',title:'Amtrak DC → NYC',
+       desc:'Salida ~19:00-20:00. Llegada Penn Station NYC ~22:30-23:00. A 5 minutos andando del hotel.',
+       price:'50-80 $/trayecto'},
+      {t:'22:00',cat:'comida',e:'🍜',title:'Cena tardía en Koreatown',
+       desc:'Penn Station a 5 min del hotel. Koreatown siempre abierto. Merecida cena tras el épico día en DC.',
+       addr:'W 32nd St, New York',transport:'🚶 5 min desde Penn Station'},
+    ]
+  },
+  {
+    date:'2026-08-26', label:'Mié 26',
+    head:'DÍA 9 · Mié 26 · 📍 ÚLTIMO DÍA COMPLETO',
+    acts:[
+      {t:'09:00',cat:'comida',e:'🍵',title:'Desayuno: Grace Street Café',
+       desc:'Café coreano con matcha, lattes de ube y postres bonitos. En vuestra misma calle. Ritmo tranquilo para el último día completo.',
+       addr:'17 W 32nd St, New York'},
+      {t:'10:00',cat:'paseo',e:'🎷',title:'OPCIÓN A: Harlem',
+       desc:'Subway 2/3 desde 34th St → 125th St. Apollo Theater (fachada icónica). Murales. Ambiente afroamericano único. OPCIÓN B: Williamsburg (Subway L desde 14th St) — arte urbano y vintage.',
+       addr:'125th St, Harlem, New York',transport:'🚇 2/3 → 125th St o L → Bedford Av'},
+      {t:'12:00',cat:'paseo',e:'🎨',title:'Explorar el barrio elegido',
+       desc:'Harlem: Lenox Ave, Apollo Theater, tiendas afrocéntricas. Williamsburg: Bedford Ave, galerías, tiendas vintage, street art.'},
+      {t:'13:00',cat:'comida',e:'🍽️',title:'Almuerzo en el barrio',
+       desc:"Harlem: Sylvia's Restaurant (soul food legendario, la mejor de NYC). Williamsburg: Smorgasburg (mercado foodie al aire libre, comprobad si hay en agosto).",
+       price:'15-25 $/pers'},
+      {t:'14:00',cat:'transporte',e:'🚇',title:'Vuelta a Midtown',
+       desc:'Últimas compras y paseo por el barrio del hotel.',transport:'🚇 vuelta a 34th St'},
+      {t:'15:00',cat:'tienda',e:'🛍️',title:'Últimas compras',
+       desc:'Herald Square / 5th Ave. Souvenirs, camisetas de NY, imanes, regalos. Todo walkable desde el hotel.',
+       addr:'Herald Square, New York'},
+      {t:'16:00',cat:'tienda',e:'♟️',title:'The Compleat Strategist',
+       desc:'Tienda de juegos de mesa, rol y wargames única en NYC. + Cualquier tienda pendiente del viaje.',
+       addr:'11 E 33rd St, New York'},
+      {t:'17:00',cat:'paseo',e:'🌳',title:'Central Park sur — Columbus Circle',
+       desc:'Columbus Circle → The Pond (extremo sur del parque). Paseo de despedida. 20 min a pie del hotel.',
+       addr:'Columbus Circle, New York',transport:'🚶 20 min a pie'},
+      {t:'18:00',cat:'paseo',e:'📸',title:'Últimas fotos — Times Square al atardecer',
+       desc:'Times Square a las 18h con sol bajo. Las mejores fotos del viaje. El recuerdo final de NYC.',
+       addr:'Times Square, New York'},
+      {t:'19:00',cat:'comida',e:'🔥',title:'CENA DESPEDIDA: miss KOREA BBQ',
+       desc:'KBBQ All You Can Eat. La cena más especial del viaje. Abierto 24h. ¡Literalmente al lado del hotel! Celebrad cada momento de este viaje.',
+       price:'All You Can Eat',addr:'10 W 32nd St, New York'},
+      {t:'21:00',cat:'transporte',e:'🧳',title:'Preparar maletas',
+       desc:'Última noche en NYC. Empezar a empaquetar para mañana. Guardar los recuerdos con cuidado.'},
+    ]
+  },
+  {
+    date:'2026-08-27', label:'Jue 27',
+    head:'DÍA 10 · Jue 27 · ✈️ VUELTA A CASA',
+    acts:[
+      {t:'09:00',cat:'comida',e:'🍱',title:'Desayuno: Food Gallery 32',
+       desc:'Food court coreano. Variado, rápido y bueno. Una última vez en vuestra calle favorita del mundo.',
+       addr:'11 W 32nd St, New York'},
+      {t:'10:00',cat:'paseo',e:'🚶',title:'Últimos paseos',
+       desc:'Madison Square Park · Flatiron Building (15 min a pie). Paseo de despedida por Midtown.',
+       addr:'Madison Square Park, New York'},
+      {t:'11:00',cat:'tienda',e:'🎁',title:'Compras de última hora',
+       desc:'Souvenirs y regalos que os falten. Herald Square + K-Town. Revisad la lista.',
+       addr:'Herald Square, New York'},
+      {t:'12:00',cat:'comida',e:'🍕',title:'Almuerzo despedida',
+       desc:"Joe's Pizza en W 14th St o repetid el restaurante favorito del viaje. El último almuerzo en NYC merece celebrarse.",
+       price:'4-5 $ slice',addr:'7 Carmine St, New York'},
+      {t:'13:00',cat:'transporte',e:'🏨',title:'Check-out del hotel',
+       desc:'Recoger maletas. Confirmar si podéis guardar el equipaje unas horas más. Últimas fotos del barrio K-Town.',
+       addr:'17 W 32nd St, New York'},
+      {t:'15:00',cat:'paseo',e:'🚶',title:'Tiempo libre',
+       desc:'Herald Sq, K-Town, Empire State Building desde la calle (a 2 bloques). Tomad un último café tranquilo.'},
+      {t:'16:00',cat:'paseo',e:'📸',title:'Fotos de despedida',
+       desc:'Empire State desde 5th Ave a 2 bloques. La foto perfecta para el último recuerdo de NYC. Hasta pronto, ciudad.',
+       addr:'5th Ave & 34th St, New York'},
+      {t:'18:00',cat:'llegada',e:'🚕',title:'TRASLADO A JFK',
+       desc:'Taxi desde hotel (~60-80 min, 60-80 $). O LIRR desde Penn Station (5 min a pie del hotel + 60 min en tren, más barato). Salir con margen.',
+       price:'60-80 $ taxi',addr:'17 W 32nd St, New York'},
+      {t:'20:00',cat:'llegada',e:'🛫',title:'Llegada JFK — Check-in y seguridad',
+       desc:'2 horas antes del vuelo para check-in + seguridad con comodidad. Duty free. Descanso en la puerta.',
+       addr:'JFK Airport, Queens, New York'},
+      {t:'23:00',cat:'llegada',e:'✈️',title:'¡HASTA LA PRÓXIMA, NYC! 🗽',
+       desc:'El vuelo despega y la ciudad de las luces se aleja. Cada luz ahí abajo es una historia. Ya estáis planeando la próxima visita, ¿verdad?'},
+    ]
+  },
+];
+
+const RESERVAS = [
+  {id:1,title:'ESTA — Autorización de viaje EEUU',
+   cuando:'Al menos 72h antes del vuelo',precio:'21 $/persona',
+   link:'https://esta.cbp.dhs.gov',
+   tip:'Solo la web .gov es oficial — no usar intermediarios (cobran 50-80 $). Formulario online, aprobación en minutos. Válida 2 años para múltiples viajes.',urgent:false},
+  {id:2,title:'New York Pass — Empire State + AMNH + Circle Line',
+   cuando:'YA (devolución gratuita hasta 90 días antes)',precio:'Essentials ~99 $ / Explorer 3 ~139 $ / Explorer 4 ~169 $',
+   link:'https://newyorkpass.com/en/passes',
+   tip:'Essentials 99 $ cubre las 3 atracciones principales. Explorer 4 si queréis backup para 9/11. Verificar si Empire State incluye doble visita AM+PM.',urgent:false},
+  {id:3,title:'Franja horaria Empire State (app Go City)',
+   cuando:'Inmediatamente tras comprar NY Pass',precio:'Incluido en NY Pass',
+   link:null,
+   tip:'Franja mañana 9-10h = menos colas. El hotel está a 2 bloques: podéis ir de noche fácilmente. Evitad franjas sunset (no incluidas en muchos passes).',urgent:false},
+  {id:4,title:'Circle Line Cruise — Franja horaria',
+   cuando:'1-2 semanas antes',precio:'Incluido en NY Pass',
+   link:null,
+   tip:'Franja mañana recomendada. Sentaos lado DERECHO (estribor) para vistas de la Estatua de la Libertad. Pier 83 a 20 min andando del hotel. Protección solar.',urgent:false},
+  {id:5,title:'AMNH — Franja horaria',
+   cuando:'1-2 semanas antes',precio:'Incluido en NY Pass',
+   link:null,
+   tip:'Franja apertura 10:00. Imprescindibles: dinosaurios 4ª planta, planetario Hayden, ballena azul. No intentar verlo todo: acabaréis agotados.',urgent:false},
+  {id:6,title:'⚡ Entradas GRATUITAS 9/11 Museum',
+   cuando:'LUNES 24 AGOSTO a las 7:00 AM hora NYC (13:00h Barcelona)',precio:'GRATIS (ahorra ~33 $/persona)',
+   link:'https://visit.911memorial.org',
+   tip:'SE AGOTAN EN MINUTOS. Página cargada a 6:55 AM. Varios dispositivos simultáneos. Crear cuenta previamente en la web. Franja 17:00. Si no conseguís, usar NY Pass Explorer 4.',urgent:true},
+  {id:7,title:'Billetes Amtrak NYC-DC (ida y vuelta)',
+   cuando:'YA — cuanto antes, más baratos (idealmente 3-6 semanas antes)',precio:'Northeast Regional 50-80 $/trayecto · Acela 80-150 $',
+   link:'https://amtrak.com',
+   tip:'Penn Station a 5 MIN A PIE del hotel. Northeast Regional = mejor precio/calidad. Asientos IZQUIERDA ida para mejores vistas. WiFi gratis + enchufes. Vuelta ~19:00.',urgent:false},
+  {id:8,title:'Air & Space Museum DC — Timed entry (opcional)',
+   cuando:'1-2 semanas antes',precio:'GRATIS (reserva de franja)',
+   link:'https://airandspace.si.edu/visit',
+   tip:'Franja 11:30 del martes 25 agosto. La National Gallery of Art NO requiere reserva. Si preferís arte → Gallery. Si ciencia/historia → Air & Space.',urgent:false},
+  {id:9,title:'Tarjeta contactless OMNY — Verificar',
+   cuando:'Antes de salir de casa',precio:'2.90 $/viaje · tope 35 $/semana',
+   link:'https://omny.info',
+   tip:'Usar SIEMPRE la misma tarjeta para acumular el tope semanal. Semana OMNY: lunes a domingo. Hotel tan céntrico que usaréis poco el metro.',urgent:false},
+  {id:10,title:'Seguro de viaje',
+   cuando:'YA, antes de salir',precio:'30-80 €',
+   link:null,
+   tip:'Sanidad en EEUU es carísima (miles de $ por urgencia). Cobertura mínima 500.000 €. La tarjeta sanitaria europea NO sirve. Ver: iati.es, coverontrip.com.',urgent:false},
+  {id:11,title:'Alojamiento 17 W 32nd St — Confirmar check-in tardío',
+   cuando:'1 semana antes del viaje',precio:'—',
+   link:null,
+   tip:'Llegáis ~medianoche el día 1. Confirmar que admiten check-in tardío. Guardar dirección + teléfono sin conexión a internet. Ubicación TOP del viaje.',urgent:false},
+];
+
+const INFO = [
+  {id:'hotel',title:'📍 Alojamiento',
+   type:'custom',html:`
+    <div style="font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:6px">17 W 32nd St, New York</div>
+    <div style="margin-bottom:8px;color:var(--text2)">Koreatown · Midtown Manhattan</div>
+    <a class="act-map" href="https://maps.google.com/?q=17+W+32nd+St+New+York+NY" target="_blank">📍 Abrir en Google Maps</a>`},
+  {id:'ventajas',title:'⭐ Ventajas de la ubicación',type:'rows',rows:[
+    {l:'🏙️ Empire State',v:'2 bloques a pie (3 min)'},
+    {l:'🚆 Penn Station → Amtrak DC',v:'5 min a pie'},
+    {l:'🎭 Times Square',v:'10 min a pie'},
+    {l:'🏬 Macy\'s Herald Square',v:'3 min a pie'},
+    {l:'🏗️ Hudson Yards / Pier 83',v:'20 min a pie'},
+    {l:'🍜 Koreatown 24h',v:'EN VUESTRA CALLE',bold:true},
+    {l:'🚇 Subway 34th St',v:'5 min (B D F M N Q R W 1 2 3)'},
+  ]},
+  {id:'ktowneats',title:'🍜 Koreatown — Vuestra calle',type:'rows',rows:[
+    {l:'Jongro BBQ',v:'22 W 32nd · 25-35 $ · BBQ auténtico',link:'https://maps.google.com/?q=22+W+32nd+St+New+York'},
+    {l:'The Kunjip',v:'32 W 32nd · 15-20 $ · Eficiente',link:'https://maps.google.com/?q=32+W+32nd+St+New+York'},
+    {l:'BCD Tofu House',v:'5 W 32nd · 15-20 $ · Abierto tarde',link:'https://maps.google.com/?q=5+W+32nd+St+New+York'},
+    {l:'miss KOREA BBQ',v:'10 W 32nd · 24h · AYCE',link:'https://maps.google.com/?q=10+W+32nd+St+New+York'},
+    {l:'Woorijip',v:'12 W 32nd · 8-12 $ · Grab & go',link:'https://maps.google.com/?q=12+W+32nd+St+New+York'},
+    {l:'Food Gallery 32',v:'11 W 32nd · Food court · Desayunos',link:'https://maps.google.com/?q=11+W+32nd+St+New+York'},
+    {l:'Grace Street Café',v:'17 W 32nd · Matcha + café coreano',link:'https://maps.google.com/?q=17+W+32nd+St+New+York'},
+  ]},
+  {id:'budget',title:'💰 Presupuesto por persona',type:'rows',rows:[
+    {l:'New York Pass Essentials',v:'~99 $'},
+    {l:'Taxi aeropuerto i/v',v:'~100 $ (dividir si sois varios)'},
+    {l:'OMNY metro 8 días',v:'~35-45 $'},
+    {l:'Amtrak NYC-DC i/v',v:'~100-160 $'},
+    {l:'Comidas 8 días',v:'~250-350 $'},
+    {l:'Extras + propinas + compras',v:'~100-150 $'},
+    {l:'💰 TOTAL ESTIMADO',v:'~685-905 $',bold:true},
+  ]},
+  {id:'tips',title:'🤑 Propinas (obligatorias en EEUU)',type:'rows',rows:[
+    {l:'Restaurante con mesa',v:'18-20% (ya incluye a veces)'},
+    {l:'Mostrador / café',v:'1-2 $'},
+    {l:'Taxi / Uber',v:'15-20%'},
+    {l:'Bar',v:'1-2 $ por bebida'},
+  ]},
+  {id:'apps',title:'📱 Apps imprescindibles',type:'items',items:[
+    {name:'Go City',d:'Entradas NY Pass + franjas horarias Empire State y AMNH'},
+    {name:'Google Maps',d:'Metro en tiempo real + rutas a pie. Modo offline: descargar NYC antes de salir'},
+    {name:'Amtrak',d:'Billetes tren a DC y estado en tiempo real'},
+    {name:'Uber / Lyft',d:'Alternativa a taxis. Más transparente en precio'},
+    {name:'Yelp',d:'Reseñas restaurantes + tiempo de espera estimado'},
+  ]},
+  {id:'agosto',title:'☀️ Consejos para agosto',type:'tips',tips:[
+    '🌡️ 30-35 °C + humedad. Ropa ligera, protección solar SPF 50+, botella reutilizable. Indispensable.',
+    '🏛️ Planear museos y tiendas en horas centrales (13-15h, el calor más fuerte).',
+    '📍 Ubicación Midtown minimiza desplazamientos: muchos días sin necesidad de metro.',
+    '🌙 Koreatown 24h: perfecta para el jet lag inicial y cenas tardías tras días intensos.',
+    '🍽️ Cenar antes de las 18:30 o después de las 21:00 para evitar las colas más largas.',
+    '💧 Las tiendas y el metro tienen aire acondicionado muy fuerte: llevar siempre una capa extra.',
+    '🔒 Manhattan es muy seguro para turistas. Sentido común básico en metro.',
+  ]},
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let dayIdx = 0;
+let curView = 'itin-view';
+let animating = false;
+
+function todayDayIdx() {
+  const t = new Date().toISOString().slice(0,10);
+  const i = DAYS.findIndex(d => d.date === t);
+  if (i >= 0) return i;
+  return new Date() < new Date('2026-08-18') ? 0 : DAYS.length - 1;
+}
+
+/* ============================================================
+   TABS
+   ============================================================ */
+function buildTabs() {
+  const wrap = document.getElementById('day-tabs');
+  wrap.innerHTML = '';
+  DAYS.forEach((d,i) => {
+    const el = document.createElement('div');
+    el.className = 'day-tab' + (i===dayIdx?' active':'');
+    el.textContent = d.label;
+    el.onclick = () => goDay(i);
+    wrap.appendChild(el);
+  });
+}
+
+function scrollTabVisible(i) {
+  const tabs = document.querySelectorAll('.day-tab');
+  if (tabs[i]) tabs[i].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+}
+
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+function renderTimeline() {
+  const d = DAYS[dayIdx];
+  const wrap = document.getElementById('tl-wrap');
+  const todayStr = new Date().toISOString().slice(0,10);
+  const isToday = d.date === todayStr;
+  const nowMin = isToday ? new Date().getHours()*60+new Date().getMinutes() : -1;
+
+  const banner = document.getElementById('today-banner');
+  if (isToday) { banner.className='show'; banner.textContent='📍 Hoy · '+d.label; }
+  else banner.className='';
+
+  const actToMin = t => { const [h,m]=t.split(':').map(Number); return h*60+m; };
+  const isCurr = (i) => {
+    if (!isToday) return false;
+    const am = actToMin(d.acts[i].t);
+    const nm = i+1 < d.acts.length ? actToMin(d.acts[i+1].t) : am+90;
+    return nowMin >= am && nowMin < nm;
+  };
+
+  let html = `<div class="day-head">${d.head}</div><div class="tl">`;
+  d.acts.forEach((a,i) => {
+    const curr = isCurr(i);
+    const mapUrl = a.addr ? `https://maps.google.com/?q=${encodeURIComponent(a.addr)}` : null;
+    const price = a.price ? `<div class="act-price">💰 ${a.price}</div>` : '';
+    const mapLink = mapUrl ? `<a class="act-map" href="${mapUrl}" target="_blank">📍 ${a.addr}</a>` : '';
+    const transport = (i>0 && a.transport) ? `<div class="tl-transport">${a.transport}</div>` : '';
+
+    html += `${transport}
+    <div class="tl-row${curr?' curr':''}">
+      <div class="tl-time">${a.t}</div>
+      <div class="tl-dot"></div>
+      <div class="act-card c-${a.cat}" onclick="this.classList.toggle('open')">
+        <div class="act-head">
+          <span class="act-emoji">${a.e}</span>
+          <div class="act-body">
+            <div class="act-title">${a.title}</div>
+            ${price}
+          </div>
+          <span class="act-chevron">▾</span>
+        </div>
+        <div class="act-detail">
+          ${a.desc || ''}
+          ${mapLink}
+        </div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+/* ============================================================
+   DAY SWITCH + SWIPE
+   ============================================================ */
+function goDay(idx, dir) {
+  if (idx===dayIdx || animating) return;
+  const direction = dir || (idx>dayIdx?'left':'right');
+  animating = true;
+  const wrap = document.getElementById('tl-wrap');
+  wrap.style.transition = 'opacity .15s,transform .15s';
+  wrap.style.opacity = '0';
+  wrap.style.transform = direction==='left' ? 'translateX(-18px)' : 'translateX(18px)';
+  setTimeout(() => {
+    dayIdx = idx;
+    renderTimeline();
+    buildTabs();
+    scrollTabVisible(idx);
+    wrap.style.transition = 'none';
+    wrap.style.transform = direction==='left' ? 'translateX(18px)' : 'translateX(-18px)';
+    wrap.style.opacity = '0';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      wrap.style.transition = 'opacity .18s,transform .18s';
+      wrap.style.opacity = '1';
+      wrap.style.transform = 'translateX(0)';
+      setTimeout(() => { animating = false; }, 220);
+    }));
+  }, 150);
+}
+
+let tx=0,ty=0;
+document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; ty=e.touches[0].clientY; },{passive:true});
+document.addEventListener('touchend', e=>{
+  if (curView!=='itin-view') return;
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+  if (Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>45) {
+    if (dx<0 && dayIdx<DAYS.length-1) goDay(dayIdx+1,'left');
+    else if (dx>0 && dayIdx>0) goDay(dayIdx-1,'right');
+  }
+},{passive:true});
+
+/* ============================================================
+   RESERVAS
+   ============================================================ */
+function getChecked() { return JSON.parse(localStorage.getItem('res_done')||'{}'); }
+function saveChecked(obj) { localStorage.setItem('res_done',JSON.stringify(obj)); }
+
+function renderReservas() {
+  const done = getChecked();
+  const n = RESERVAS.filter(r=>done[r.id]).length;
+  const pct = Math.round(n/RESERVAS.length*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = `${n}/${RESERVAS.length} completados · ${pct}%`;
+
+  document.getElementById('res-list').innerHTML = RESERVAS.map(r => {
+    const ck = !!done[r.id];
+    return `<div class="res-card${ck?' done':''}">
+      <div class="res-chk${ck?' on':''}" onclick="toggleRes(${r.id})">${ck?'✓':''}</div>
+      <div style="flex:1">
+        <div class="res-num">${String(r.id).padStart(2,'0')}</div>
+        <div class="res-title">${r.title}</div>
+        <div class="res-meta">
+          <div>⏰ ${r.cuando}</div>
+          <div class="res-price">💰 ${r.precio}</div>
+          ${r.link?`<div class="res-link">🔗 <a href="${r.link}" target="_blank">${r.link}</a></div>`:''}
+          ${r.tip?`<div class="res-tip">💡 ${r.tip}</div>`:''}
+        </div>
+        ${r.urgent?`<div class="res-urgent">⚠️ ACCIÓN EN MOMENTO EXACTO — Ver descripción</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRes(id) {
+  const d = getChecked();
+  d[id] = !d[id];
+  saveChecked(d);
+  renderReservas();
+}
+
+/* ============================================================
+   INFO
+   ============================================================ */
+function renderInfo() {
+  document.getElementById('info-view').innerHTML = INFO.map(sec => {
+    let body = '';
+    if (sec.type==='custom') body = sec.html;
+    else if (sec.type==='rows') body = sec.rows.map(r =>
+      `<div class="irow${r.bold?' bold':''}">
+        <span class="ilabel">${r.l}</span>
+        <span class="ival">${r.link?`<a href="${r.link}" target="_blank">${r.v}</a>`:r.v}</span>
+      </div>`).join('');
+    else if (sec.type==='items') body = sec.items.map(it =>
+      `<div class="app-line" style="margin-bottom:6px"><strong>${it.name}:</strong> ${it.d}</div>`).join('');
+    else if (sec.type==='tips') body = sec.tips.map(t =>
+      `<div class="tip-line">${t}</div>`).join('');
+
+    return `<div class="info-sec" id="is-${sec.id}">
+      <div class="info-hdr" onclick="document.getElementById('is-${sec.id}').classList.toggle('open')">
+        <span>${sec.title}</span><span class="info-chev">▾</span>
+      </div>
+      <div class="info-body">${body}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   VIEW SWITCH
+   ============================================================ */
+function showView(id, btn) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.fnav').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  curView = id;
+  if (id==='res-view') renderReservas();
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   HEADER HEIGHT ADJUSTMENT
+   ============================================================ */
+function fitHeader() {
+  const h = document.getElementById('header').offsetHeight;
+  document.getElementById('main').style.paddingTop = (h+2)+'px';
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+dayIdx = todayDayIdx();
+buildTabs();
+renderTimeline();
+renderInfo();
+fitHeader();
+scrollTabVisible(dayIdx);
+window.addEventListener('resize', fitHeader);
+</script>
+</body>
+</html>
